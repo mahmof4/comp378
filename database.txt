@@ -1,0 +1,50 @@
+/* 
+@author Fahad Mahmood
+ */
+package userinput; //name of the package
+import java.util.Scanner;
+import java.sql.*;
+
+public class UserInput {
+    public static void main(String[] args) {
+       try{
+       String connurl="jdbc:oracle:thin:@localhost:1521:xe";
+       Class.forName("oracle.jdbc.driver.OracleDriver");  
+       Connection con = DriverManager.getConnection(connurl, "mahmof4", "athabascau");
+       
+       Scanner user_input = new Scanner(System.in);
+       System.out.println("Please enter the Patient ID:");
+       int patient_id = user_input.nextInt();
+       Statement stmt=con.createStatement(); 
+
+       ResultSet rs=stmt.executeQuery("SELECT Patients.pid, Patients.name FROM Patients WHERE Patients.pid =" +patient_id);
+       while(rs.next()){
+       System.out.println("\nPatient Number: " +rs.getInt("pid")+ "\n\nPatient Name: " +rs.getString("name"));
+       System.out.println();}
+       
+
+       ResultSet rs2=stmt.executeQuery("SELECT Care_Centres.cid, Care_centres.name, Patients.care_centre_id, Patients.pid FROM Care_centres, Patients WHERE Patients.care_centre_id = Care_centres.cid AND Patients.pid=" +patient_id);
+       while(rs2.next()){
+       System.out.println("Care Center Name: " +rs2.getString("name"));
+       System.out.println();}
+       
+       ResultSet rs3=stmt.executeQuery("SELECT Nurses. name, Nurses.nid, Care_centres.cid, Care_centres.nurse_charge_id, Patients.care_centre_id FROM Nurses, Care_centres, Patients WHERE Patients.care_centre_id = Care_centres.cid AND Care_centres.nurse_charge_id = Nurses.nid AND Patients.pid=" +patient_id);
+       while(rs3.next()){
+       System.out.println("Nurse Incharge: " +rs3.getString("name"));
+       System.out.println();}
+       
+       ResultSet rs4=stmt.executeQuery("SELECT * FROM Treatments, Patients WHERE Treatments.patient_id = Patients.pid AND Patients.pid=" +patient_id);
+       System.out.printf("%12s  %14s  %12s  %10s", "Treatment ID", "Treatment Name", "Physician ID", "Date");
+       System.out.println();
+       System.out.println();
+       while(rs4.next()){
+       System.out.format("%12s  %14s  %12s  %10s", rs4.getString("tid"), rs4.getString("treatment_name"), rs4.getString("physician_id"), rs4.getString("tdate"));
+       System.out.println();}
+             
+       con.close();
+       }
+       catch (Exception e) {
+       System.out.println("ERROR: Please enter a correct Patient Number");
+       }
+    }   
+}
